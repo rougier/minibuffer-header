@@ -71,10 +71,10 @@
 
   (concat 
    (propertize (format " #%d Minibuffer" (minibuffer-depth))
-   'face '(bold minibuffer-header-face))
-   (propertize
-    (format " (%s)" this-command)
-   'face 'minibuffer-header-face)))
+               'face '(bold minibuffer-header-face))
+   (propertize (format " (%s)" this-command)
+               'face 'minibuffer-header-face)
+   ))
 
 
 (defun minibuffer-header--setup ()
@@ -89,6 +89,7 @@
     (goto-char (point-min))
     (let* ((inhibit-read-only t)
            (left (minibuffer-header-format))
+           (left (split-string left "\n"))
            (right " ")
 	       (prompt-beg (point-min))
 	       (prompt-end (or (next-property-change (+ 1 (point-min)))
@@ -99,7 +100,7 @@
 
       (goto-char (point-min))
       (insert (propertize
-               (concat (propertize left)
+               (concat (propertize (car left))
                        (propertize " "
                                    'message-beg t
                                    'face 'minibuffer-header-face
@@ -108,7 +109,8 @@
                                    'face 'minibuffer-header-message-face)
                        (propertize "\n"
                                    'face 'minibuffer-header-face
-                                   'message-end t))
+                                   'message-end t)
+                       (mapconcat #'identity (cdr left) ""))
                'cursor-intangible t
                'read-only t
                'field t
