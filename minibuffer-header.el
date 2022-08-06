@@ -50,11 +50,12 @@
   "Whether to show messages in the header (on the right)."
   :type 'bool)
 
+(defcustom minibuffer-header-hide-prompt t
+  "Whether to hide original minibuffer prompt."
+  :type 'bool)
+
 (defface minibuffer-header-face
   `((t :inherit highlight
-       :box (:line-width (1 . 3)
-             :color ,(face-background 'highlight)
-             :style flat)
        :extend t))
   "Face for the minibuffer header"
   :group 'minibuffer-header)
@@ -84,32 +85,40 @@
   (cursor-intangible-mode t)
 
   ;; Install the header line
-  (let* ((inhibit-read-only t))
-    (save-excursion
+  (save-excursion
+    (goto-char (point-min))
+    (let* ((inhibit-read-only t)
+           (left (minibuffer-header-format))
+           (right " ")
+	       (prompt-beg (point-min))
+	       (prompt-end (or (next-property-change (+ 1 (point-min)))
+		                   (max (point-min) (- (point-max) 0)))))
+
+      (when minibuffer-header-hide-prompt
+        (add-text-properties prompt-beg prompt-end '(invisible t)))
+
       (goto-char (point-min))
-      (let ((left (minibuffer-header-format))
-            (right " "))
-        (insert (propertize
-                 (concat (propertize left)
-                         (propertize " "
-                                     'message-beg t
-                                     'face 'minibuffer-header-face
-                                     'display `(space :align-to (- right ,(- (length right) -1))))
-                         (propertize right
-                                     'face 'minibuffer-header-message-face)
-                         (propertize "\n"
-                                     'face 'minibuffer-header-face
-                                     'message-end t))
+      (insert (propertize
+               (concat (propertize left)
+                       (propertize " "
+                                   'message-beg t
+                                   'face 'minibuffer-header-face
+                                   'display `(space :align-to (- right ,(- (length right) -1))))
+                       (propertize right
+                                   'face 'minibuffer-header-message-face)
+                       (propertize "\n"
+                                   'face 'minibuffer-header-face
+                                   'message-end t))
                'cursor-intangible t
                'read-only t
                'field t
                'rear-nonsticky t
-               'front-sticky t)))))
+               'front-sticky t))
 
   ;; Install our error function and message
   (when minibuffer-header-show-message
-    (setq command-error-function #'minibuffer-header--command-error-function)
-    (advice-add 'message :override #'minibuffer-header--message-override)))
+    (setq command-error-function #'minibuffer-header--command-error-function)x
+    (advice-add 'message :override #'minibuffer-header--message-override)))))
 
 (defun minibuffer-header--exit ()
   "Remove our error function and message"
@@ -120,7 +129,7 @@
       (advice-remove 'message #'minibuffer-header--message-override))))
 
 (defun minibuffer-header-message (&optional msg)
-  "Display MSG at the right of the minibuffer header line"""
+  "Display MSG at the right of the minibuffer header line"
 
   (when-let* ((msg (or msg " "))
               (window (active-minibuffer-window))
@@ -196,8 +205,6 @@
             (run-at-time minibuffer-message-timeout nil
                          #'minibuffer-header-message)))))
 
-
-
 (define-minor-mode minibuffer-header-mode
   "Minor mode for installing a header line in the minibuffer"
   :group 'minibuffer-header
@@ -208,7 +215,6 @@
     (progn
       (remove-hook 'minibuffer-setup-hook  #'minibuffer-header--setup)
       (remove-hook 'minibuffer-exit-hook  #'minibuffer-header--exit))))
-      
 
 (provide 'minibuffer-header)
 ;;; minibuffer-header.el ends here
