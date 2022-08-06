@@ -199,7 +199,7 @@
 
 
 (define-minor-mode minibuffer-header-mode
-  "Minor mode for graphical tag as rounded box."
+  "Minor mode for installing a header line in the minibuffer"
   :group 'minibuffer-header
   (if minibuffer-header-mode
       (progn
