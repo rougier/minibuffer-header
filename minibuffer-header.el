@@ -50,7 +50,7 @@
   "Whether to show messages in the header (on the right)."
   :type 'bool)
 
-(defcustom minibuffer-header-hide-prompt t
+(defcustom minibuffer-header-hide-prompt nil
   "Whether to hide original minibuffer prompt."
   :type 'bool)
 
