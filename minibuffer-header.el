@@ -117,7 +117,7 @@
 
   ;; Install our error function and message
   (when minibuffer-header-show-message
-    (setq command-error-function #'minibuffer-header--command-error-function)x
+    (setq command-error-function #'minibuffer-header--command-error-function)
     (advice-add 'message :override #'minibuffer-header--message-override)))))
 
 (defun minibuffer-header--exit ()
