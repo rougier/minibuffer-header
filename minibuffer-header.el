@@ -123,7 +123,7 @@
                        (propertize "\n"
                                    'face 'minibuffer-header-face
                                    'message-end t)
-                       (mapconcat #'identity (cdr left) ""))
+                       (mapconcat #'identity (cdr left) "\n"))
                'cursor-intangible t
                'read-only t
                'field t
