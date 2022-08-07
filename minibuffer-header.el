@@ -174,12 +174,19 @@
 
 
 (defun minibuffer-header--message-override (orig-fun &rest args)
+(defun minibuffer-header--log (format-string &rest args)
+  (with-current-buffer (get-buffer-create "*Messages*")
+    (let ((inhibit-read-only t)
+          (msg (apply 'format-message format-string args)))
+      (when (and msg message-log-max)
+        (goto-char (point-max))
+        (insert (concat "\n" msg))))))
+
+(defun minibuffer-header--message-override (&rest args)
   "This advice is used to override the original message function"
 
-  ;; Debug buffer (since we cannot use message for log)
-  ;; (with-current-buffer (get-buffer-create "*minibuffer-header-debug*")
-  ;;  (goto-char (point-max))
-  ;;  (insert (format "\n%s" args)))
+  (when (car args)
+    (apply #'minibuffer-header--log args))
   
   (let* ((msg (if (and (car args) (stringp (car args)))
                   (apply 'format-message args)
