@@ -48,11 +48,15 @@
 
 (defcustom minibuffer-header-show-message t
   "Whether to show messages in the header (on the right)."
-  :type 'bool)
+  :type 'boolean)
 
 (defcustom minibuffer-header-hide-prompt nil
   "Whether to hide original minibuffer prompt."
-  :type 'bool)
+  :type 'boolean)
+
+(defcustom minibuffer-header-default-message "-"
+  "Default displayed message when no message"
+  :type 'string)
 
 (defface minibuffer-header-face
   `((t :inherit highlight
@@ -73,9 +77,14 @@
    (propertize (format " #%d Minibuffer" (minibuffer-depth))
                'face '(bold minibuffer-header-face))
    (propertize (format " (%s)" this-command)
-               'face 'minibuffer-header-face)
-   ))
+               'face 'minibuffer-header-face)))
 
+(defun minibuffer-header--fit (msg width)
+  "Make MSG to fit exactly WIDTH characters, by truncating or padding"
+  
+  (if (> (length msg) width)
+      (concat (substring msg 0 (- width 1)) "…")
+    (format (format "%%%ds" width) msg)))
 
 (defun minibuffer-header--setup ()
   "Install header line in the minibuffer"
@@ -90,7 +99,9 @@
     (let* ((inhibit-read-only t)
            (left (minibuffer-header-format))
            (left (split-string left "\n"))
-           (right " ")
+           (width (- (window-width) (length (car left)) 2))
+           (right minibuffer-header-default-message)
+           (right (minibuffer-header--fit right width))
 	       (prompt-beg (point-min))
 	       (prompt-end (or (next-property-change (+ 1 (point-min)))
 		                   (max (point-min) (- (point-max) 0)))))
@@ -103,8 +114,7 @@
                (concat (propertize (car left))
                        (propertize " "
                                    'message-beg t
-                                   'face 'minibuffer-header-face
-                                   'display `(space :align-to (- right ,(- (length right) -1))))
+                                   'face 'minibuffer-header-face)
                        (propertize right
                                    'face 'minibuffer-header-message-face)
                        (propertize "\n"
@@ -133,47 +143,35 @@
 (defun minibuffer-header-message (&optional msg)
   "Display MSG at the right of the minibuffer header line"
 
-  (when-let* ((msg (or msg " "))
+  (when-let* ((msg (or msg minibuffer-header-default-message))
               (window (active-minibuffer-window))
               (buffer (window-buffer window)))
       (with-current-buffer buffer
         (save-excursion
-
-          ;; Search for message marker (in heade line)
           (goto-char (point-min))
-          (let ((beg (when (text-property-search-forward 'message-beg) (- (point) 1)))
-                (end (when (text-property-search-forward 'message-end) (point))))
+          (let* ((beg (when (text-property-search-forward 'message-beg) (point)))
+                 (end (when (text-property-search-forward 'message-end) (- (point) 1))))
             (when (and beg end)
               (let* ((inhibit-read-only t)
+                     (inhibit-message t)
                      (message-log-max nil)
-                     (width (- (window-width) beg 1))
-                     (msg (if (> (length msg) width)
-                              (format "%s…" (substring msg 0 (- width 1)))
-                            msg))
-                     (inhibit-message t))
-
+                     (width (- (window-width window) beg))
+                     (msg (minibuffer-header--fit msg width)))
+                
                 ;; Delete old message
                 (delete-region beg end)
 
                 ;; Insert new message
                 (goto-char beg)
                 (insert
-                  (propertize
-                   (concat
-                    (propertize " " 'message-beg t
-				                    'face 'minibuffer-header-face
-                                    'display `(space :align-to (- right ,(- (length msg) -1))))
-                    (propertize msg 'face 'minibuffer-header-message-face)
-                    (propertize "\n" 'face 'minibuffer-header-face
-				                     'message-end t))
-                   'cursor-intangible t
-                   'read-only t
-                   'field t
-                   'rear-nonsticky t
-                   'front-sticky t)))))))))
+                 (propertize msg
+                  'face 'minibuffer-header-message-face
+                  'cursor-intangible t
+                  'read-only t
+                  'field t
+                  'rear-nonsticky t
+                  'front-sticky t)))))))))
 
-
-(defun minibuffer-header--message-override (orig-fun &rest args)
 (defun minibuffer-header--log (format-string &rest args)
   (with-current-buffer (get-buffer-create "*Messages*")
     (let ((inhibit-read-only t)
