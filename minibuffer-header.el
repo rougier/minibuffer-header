@@ -1,10 +1,10 @@
 ;;; minibuffer-header.el --- Minibuffer header line -*- lexical-binding: t -*-
 
-;; Copyright (C) 2022 Nicolas P. Rougier
+;; Copyright (C) 2022  Free Software Foundation, Inc.
 
 ;; Maintainer: Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
 ;; URL: https://github.com/rougier/minibuffer-header
-;; Version: 0.1
+;; Version: 0.2
 ;; Package-Requires: ((emacs "27.1"))
 ;; Keywords: convenience
 
@@ -35,6 +35,9 @@
 ;;
 
 ;; NEWS:
+;;
+;; Version 0.2
+;; - Bugfix + ELPA release
 ;;
 ;; Version 0.1
 ;; - First version
