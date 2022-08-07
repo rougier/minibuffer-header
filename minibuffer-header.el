@@ -4,7 +4,7 @@
 
 ;; Maintainer: Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
 ;; URL: https://github.com/rougier/minibuffer-header
-;; Version: 0.2
+;; Version: 0.3
 ;; Package-Requires: ((emacs "27.1"))
 ;; Keywords: convenience
 
@@ -36,6 +36,9 @@
 
 ;; NEWS:
 ;;
+;; Version 0.3
+;; - Format can now be a string or a function
+;;
 ;; Version 0.2
 ;; - Bugfix + ELPA release
 ;;
@@ -49,6 +52,12 @@
   "Minibuffer header"
   :group 'minibuffer)
 
+(defcustom minibuffer-header-format 'minibuffer-header-format-default
+  "Default displayed message when no message"
+  :type '(radio (string :tag "Static (string)")
+                (function :tag "Dynamic (function)"))
+  :group 'minibuffer-header)
+
 (defcustom minibuffer-header-show-message t
   "Whether to show messages in the header (on the right)."
   :type 'boolean)
@@ -58,7 +67,7 @@
   :type 'boolean)
 
 (defcustom minibuffer-header-default-message "-"
-  "Default displayed message when no message"
+  "Default displayed message when there is no message"
   :type 'string)
 
 (defface minibuffer-header-face
@@ -73,7 +82,7 @@
   "Face for the minibuffer header"
   :group 'minibuffer-header)
 
-(defun minibuffer-header-format ()
+(defun minibuffer-header-format-default ()
   "Minibuffer header line"
 
   (concat 
@@ -100,7 +109,9 @@
   (save-excursion
     (goto-char (point-min))
     (let* ((inhibit-read-only t)
-           (left (minibuffer-header-format))
+           (left (if (stringp 'minibuffer-header-format)
+                     minibuffer-header-format
+                 (funcall minibuffer-header-format)))
            (left (split-string left "\n"))
            (width (- (window-width) (length (car left)) 2))
            (right minibuffer-header-default-message)
