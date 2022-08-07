@@ -1,0 +1,3 @@
+*.elc
+/minibuffer-header-autoloads.el
+/minibuffer-header-pkg.el
