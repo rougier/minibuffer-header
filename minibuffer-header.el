@@ -4,7 +4,7 @@
 
 ;; Maintainer: Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
 ;; URL: https://github.com/rougier/minibuffer-header
-;; Version: 0.3
+;; Version: 0.4
 ;; Package-Requires: ((emacs "27.1"))
 ;; Keywords: convenience
 
@@ -36,6 +36,9 @@
 
 ;; NEWS:
 ;;
+;; Version 0.4
+;; - Regular prompt can be used in header
+;;
 ;; Version 0.3
 ;; - Format can now be a string or a function
 ;;
@@ -52,7 +55,7 @@
   "Minibuffer header"
   :group 'minibuffer)
 
-(defcustom minibuffer-header-format 'minibuffer-header-format-default
+(defcustom minibuffer-header-format #'minibuffer-header-format-default
   "Default displayed message when no message"
   :type '(radio (string :tag "Static (string)")
                 (function :tag "Dynamic (function)"))
@@ -82,7 +85,7 @@
   "Face for the minibuffer header"
   :group 'minibuffer-header)
 
-(defun minibuffer-header-format-default ()
+(defun minibuffer-header-format-default (prompt)
   "Minibuffer header line"
 
   (concat 
@@ -109,16 +112,18 @@
   (save-excursion
     (goto-char (point-min))
     (let* ((inhibit-read-only t)
+	       (prompt-beg (point-min))
+	       (prompt-end (or (next-property-change (+ 1 (point-min)))
+		                   (max (point-min) (- (point-max) 0))))
+           (prompt (buffer-substring-no-properties prompt-beg prompt-end))
            (left (if (stringp 'minibuffer-header-format)
                      minibuffer-header-format
-                 (funcall minibuffer-header-format)))
+                 (funcall minibuffer-header-format prompt)))
            (left (split-string left "\n"))
            (width (- (window-width) (length (car left)) 2))
            (right minibuffer-header-default-message)
            (right (minibuffer-header--fit right width))
-	       (prompt-beg (point-min))
-	       (prompt-end (or (next-property-change (+ 1 (point-min)))
-		                   (max (point-min) (- (point-max) 0)))))
+           )
 
       (when minibuffer-header-hide-prompt
         (add-text-properties prompt-beg prompt-end '(invisible t)))
