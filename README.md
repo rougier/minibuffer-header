@@ -8,10 +8,7 @@ line in the minibuffer.
 Install with:
 
 ```lisp
-(straight-use-package
- '(minibuffer-header :type git
-                     :host github
-                     :repo "rougier/minibuffer-header"))
+(package-install 'minibuffer-header)
 ```
 
 ### Usage example:
