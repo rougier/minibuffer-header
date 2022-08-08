@@ -113,8 +113,13 @@
     (goto-char (point-min))
     (let* ((inhibit-read-only t)
 	       (prompt-beg (point-min))
-	       (prompt-end (or (next-property-change (+ 1 (point-min)))
-		                   (max (point-min) (- (point-max) 0))))
+           (prompt-end nil)
+           (prompt-end (or prompt-end
+                           (save-excursion (search-forward-regexp ":[ \t]*" nil t))))
+           (prompt-end (or prompt-end
+                           (next-property-change (+ 1 (point-min)))))
+           (prompt-end (or prompt-end
+                           (point-max)))           
            (prompt (buffer-substring-no-properties prompt-beg prompt-end))
            (left (if (stringp 'minibuffer-header-format)
                      minibuffer-header-format
@@ -122,8 +127,7 @@
            (left (split-string left "\n"))
            (width (- (window-width) (length (car left)) 2))
            (right minibuffer-header-default-message)
-           (right (minibuffer-header--fit right width))
-           )
+           (right (minibuffer-header--fit right width)))
 
       (when minibuffer-header-hide-prompt
         (add-text-properties prompt-beg prompt-end '(invisible t)))
