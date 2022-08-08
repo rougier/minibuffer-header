@@ -112,15 +112,9 @@
   (save-excursion
     (goto-char (point-min))
     (let* ((inhibit-read-only t)
+           (prompt (substring-no-properties (minibuffer-prompt)))
 	       (prompt-beg (point-min))
-           (prompt-end nil)
-           (prompt-end (or prompt-end
-                           (save-excursion (search-forward-regexp ":[ \t]*" nil t))))
-           (prompt-end (or prompt-end
-                           (next-property-change (+ 1 (point-min)))))
-           (prompt-end (or prompt-end
-                           (point-max)))           
-           (prompt (buffer-substring-no-properties prompt-beg prompt-end))
+           (prompt-end (+ 1 (length prompt)))
            (left (if (stringp 'minibuffer-header-format)
                      minibuffer-header-format
                  (funcall minibuffer-header-format prompt)))
