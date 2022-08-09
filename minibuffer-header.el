@@ -4,7 +4,7 @@
 
 ;; Maintainer: Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
 ;; URL: https://github.com/rougier/minibuffer-header
-;; Version: 0.4
+;; Version: 0.5
 ;; Package-Requires: ((emacs "27.1"))
 ;; Keywords: convenience
 
@@ -35,6 +35,10 @@
 ;;
 
 ;; NEWS:
+;;
+;; Version 0.5
+;; - Simplified prompt capture
+;; - Better handling of user defined header
 ;;
 ;; Version 0.4
 ;; - Regular prompt can be used in header
