@@ -118,7 +118,10 @@
            (left (if (stringp 'minibuffer-header-format)
                      minibuffer-header-format
                  (funcall minibuffer-header-format prompt)))
-           (left (split-string left "\n"))
+           (left (if (string-match "\\(.*\\)\n\\(\\(?:.*\n*\\)*\\)" left)
+                     (cons (match-string 1 left)
+                           (match-string 2 left))
+                   (cons left "")))
            (width (- (window-width) (length (car left)) 2))
            (right minibuffer-header-default-message)
            (right (minibuffer-header--fit right width)))
@@ -129,15 +132,15 @@
       (goto-char (point-min))
       (insert (propertize
                (concat (propertize (car left))
-                       (propertize " "
-                                   'message-beg t
-                                   'face 'minibuffer-header-face)
-                       (propertize right
-                                   'face 'minibuffer-header-message-face)
-                       (propertize "\n"
-                                   'face 'minibuffer-header-face
-                                   'message-end t)
-                       (mapconcat #'identity (cdr left) "\n"))
+                 (propertize " "
+                             'face 'minibuffer-header-face
+                             'message-beg t
+                             'display `(space :align-to (- right ,(- (length right) -1))))
+                 (propertize right
+                             'face 'minibuffer-header-message-face)
+                 (propertize "\n" 'message-end t
+                                 'face 'minibuffer-header-face)
+                 (cdr left))
                'cursor-intangible t
                'read-only t
                'field t
