@@ -236,6 +236,7 @@
             (run-at-time minibuffer-message-timeout nil
                          #'minibuffer-header-message)))))
 
+;;;###autoload
 (define-minor-mode minibuffer-header-mode
   "Minor mode for installing a header line in the minibuffer"
   :group 'minibuffer-header
